@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Meine AI App</title>
+    <style>
+        body { font-family: sans-serif; max-width: 600px; margin: 40px auto; padding: 0 20px; background: #121212; color: #e0e0e0; }
+        input, button { padding: 12px; margin: 8px 0; width: 100%; box-sizing: border-box; border-radius: 6px; border: 1px solid #333; background: #1e1e1e; color: #fff; }
+        button { background: #6200ee; border: none; cursor: pointer; font-weight: bold; }
+        button:hover { background: #7c4dff; }
+        #output { margin-top: 20px; padding: 15px; background: #1e1e1e; border-radius: 6px; white-space: pre-wrap; }
+    </style>
+</head>
+<body>
+
+    <h1>Meine eigene AI App</h1>
+    <p>Verknüpft mit Firebase Hosting & Datenbank.</p>
+
+    <input type="text" id="userInput" placeholder="Frage an die KI eingeben...">
+    <button onclick="handleAIRequest()">Anfrage senden</button>
+
+    <div id="output">Antwort der KI erscheint hier...</div>
+
+    <!-- Firebase SDK -->
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
+        import { getFirestore, collection, addDoc } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
+
+        // Trage hier deine Firebase-Daten ein (findest du in der Firebase Console unter Projekt-Einstellungen -> Web-App)
+        const firebaseConfig = {
+            apiKey: "DEIN_API_KEY",
+            authDomain: "DEIN_PROJEKT.firebaseapp.com",
+            projectId: "DEIN_PROJEKT_ID",
+            storageBucket: "DEIN_PROJEKT.appspot.com",
+            messagingSenderId: "DEINE_ID",
+            appId: "DEINE_APP_ID"
+        };
+
+        // Firebase initialisieren
+        const app = initializeApp(firebaseConfig);
+        const db = getFirestore(app);
+
+        // Globale Funktion für den Button
+        window.handleAIRequest = async function() {
+            const text = document.getElementById('userInput').value;
+            const outputDiv = document.getElementById('output');
+
+            if(!text) return;
+            outputDiv.innerText = " KI denkt nach...";
+
+            // Hier bindest du später deine KI (z.B. Gemini API oder OpenAI) ein
+            const aiResponse = "Das ist die Antwort auf deine Frage: \"" + text + "\"";
+            outputDiv.innerText = aiResponse;
+
+            // Speichert die Anfrage + Antwort direkt in deiner Firestore-Datenbank
+            try {
+                await addDoc(collection(db, "ai_chats"), {
+                    prompt: text,
+                    response: aiResponse,
+                    timestamp: new Date()
+                });
+                console.log("Erfolgreich in Firebase gespeichert!");
+            } catch (e) {
+                console.error("Fehler beim Speichern in Firestore: ", e);
+            }
+        }
+    </script>
+</body>
+</html>
